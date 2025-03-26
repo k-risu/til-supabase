@@ -1,26 +1,24 @@
 "use client";
+import { useEffect, useState } from "react";
+
+// actions
 import { createTodo, getTodos, TodosRow } from "@/app/actions/todos-action";
+
 // scss
 import styles from "@/components/common/navigation/SideNavigation.module.scss";
-// shadcn/ui
+
+// sahdcn/ui
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dot, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
-// interface BoardContent {
-//   content: string;
-//   title: string;
-//   id: number;
-// }
+import { useRouter } from "next/navigation";
 
 function SideNavigation() {
   // 라우터 이동
   const router = useRouter();
-  const [todos, setTodos] = useState<TodosRow[] | null>([]);
 
+  const [todos, setTodos] = useState<TodosRow[] | null>([]);
   // create
   const onCreate = async () => {
     const { data, error, status } = await createTodo({
@@ -29,18 +27,20 @@ function SideNavigation() {
       start_date: new Date().toISOString(),
       end_date: new Date().toISOString(),
     });
+    // 에러 발생시
     if (error) {
       toast.error("데이터 추가 실패", {
-        description: `데이터추가에 실패하였습니다. ${error.message}`,
+        description: `데이터 추가에 실패하였습니다. ${error.message}`,
         duration: 3000,
       });
       return;
     }
     // 최종 데이터
     toast.success("데이터 추가 성공", {
-      description: `데이터추가에 성공하였습니다.`,
+      description: "데이터 추가에 성공하였습니다",
       duration: 3000,
     });
+    console.log("등록된 id ", data.id);
     // 데이터 추가 성공시 할일 등록창으로 이동시킴
     // http://localhost:3000/create/ [data.id] 로 이동
     router.push(`/create/${data.id}`);
@@ -48,10 +48,9 @@ function SideNavigation() {
   // read
   const fetchGetTodos = async () => {
     const { data, error, status } = await getTodos();
-
     // 에러 발생시
     if (error) {
-      toast.error("데이터 조회 실패", {
+      toast.error("데이터조회실패", {
         description: `데이터조회에 실패하였습니다. ${error.message}`,
         duration: 3000,
       });
@@ -59,11 +58,13 @@ function SideNavigation() {
     }
     // 최종 데이터
     toast.success("데이터 조회 성공", {
-      description: `데이터조회에 성공하였습니다. ${data}`,
+      description: "데이터조회에 성공하였습니다",
       duration: 3000,
     });
+
     setTodos(data);
   };
+
   useEffect(() => {
     fetchGetTodos();
   }, []);
@@ -76,11 +77,7 @@ function SideNavigation() {
           placeholder="검색어를 입력하세요."
           className="focus-visible:right"
         />
-        <Button
-          variant={"outline"}
-          size={"icon"}
-          className={styles.container_searchBox_button}
-        >
+        <Button variant={"outline"} size={"icon"}>
           <Search className="w-4 h-4" />
         </Button>
       </div>
@@ -89,9 +86,7 @@ function SideNavigation() {
         <Button
           variant={"outline"}
           className="w-full text-orange-500 border-orange-400 hover:bg-orange-50 hover:text-orange-500"
-          onClick={() => {
-            onCreate();
-          }}
+          onClick={onCreate}
         >
           Add New Page
         </Button>

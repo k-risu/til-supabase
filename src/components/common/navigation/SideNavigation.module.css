@@ -24,7 +24,6 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 4px;
 }
 .container_todos_label {
   margin: 8px 0;
