@@ -1,199 +1,123 @@
-# Supabase 셋팅
-
-## 1. `.env 파일 생성`
-
-- `/.env.local` 파일 생성
-- `/.env.production` 파일 생성
-
-```txt
-NEXT_PUBLIC_SUPABASE_ID=
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-NEXT_PUBLIC_STORAGE_BUCKET=
-
-SUPABASE_DB_PASSWORD=
-SUPABASE_SERVICE_ROLE=
-SITE_URL=http://localhost:3000
-```
-
-## 2. 계정 생성
-
-- https://supabase.com
-- 깃허브 연동 실행
-- .env 내용 작성
-
-## 3. 테이블 생성
-
-- `public,todos` 생성
-- id, title, content 생성
-- RLS 해제하였음.
-
-## 4. Supabase CLI 설치
-
-- https://supabase.com/docs/guides/api/rest/generating-types
+# 프로젝트 생성
 
 ```bash
-npm i supabase@">=1.8.1" --save-dev --legacy-peer-deps
+npx create-next-app@latest .
 ```
+
+# Git 셋팅
 
 ```bash
-npm i --save @supabase/ssr --legacy-peer-deps
-npm install @supabase/supabase-js --legacy-peer-deps
+git init
+git remote add origin 주소
+git remote -v
 ```
 
-- Supabash 로그인 후 실행
+# prettier 셋팅
 
 ```bash
-npx supabase login
+npm install --save-dev prettier eslint-config-prettier eslint-plugin-prettier
 ```
 
-## 5. 테이블의 데이터 타입 자동으로 생성하기
+- `/.prettierrc 파일 생성`
 
-- package.json 수정
+```
+{
+  "semi": true,
+  "singleQuote": false,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 80,
+  "bracketSpacing": true,
+  "arrowParens": "always"
+}
+```
+
+# eslint 설정
+
+```bash
+npm install --save-dev eslint-plugin-prettier eslint-config-prettier
+```
+
+- eslint.config.mjs 에 `rule 설정`
+
+```js
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
+
+// Prettier 플러그인 추가
+import eslintPluginPrettier from "eslint-plugin-prettier";
+import eslintConfigPrettier from "eslint-config-prettier";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
+const eslintConfig = [
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    plugins: {
+      prettier: eslintPluginPrettier, //  Prettier 플러그인 추가
+    },
+    rules: {
+      ...eslintConfigPrettier.rules, //  Prettier와 충돌하는 ESLint 규칙 비활성화
+      "prettier/prettier": ["warn", { endOfLine: "auto" }], //  Prettier 스타일을 강제 적용 (오류 발생 시 ESLint에서 표시)
+      "@typescript-eslint/no-unused-vars": "warn", //  기존 TypeScript 규칙 유지
+      "@typescript-eslint/no-explicit-any": "off", //  any 타입 사용 허용
+    },
+  },
+];
+
+export default eslintConfig;
+```
+
+# VSCode 자동 포맷 설정 관리
+
+- `/.vscode 폴더 생성`
+- `/.vscode/settings.json 파일 생성`
 
 ```json
-"scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "generate-types": "npx supabase gen types typescript --project-id 프로젝트아이디 --schema public > src/types/types_db.ts"
-  },
-```
-
-```bash
-npm run generate-types
-```
-
-- /src/types/types_db.ts 생성확인 요망
-
-## 6. Supabase 활용 관련 파일 생성
-
-- /src/lib 폴더에 기준
-- `/src/lib/supabase 폴더 생성`
-- `/src/lib/supabase/client.ts 파일 생성`
-
-```ts
-import { createBrowserClient } from "@supabase/ssr";
-import { Database } from "@/types/types_db";
-
-export function createClient() {
-  return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
-```
-
-- `/src/lib/supabase/server.ts 파일 생성`
-
-```ts
-"use server";
-
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
-
-export async function createServerSideClient() {
-  const cookieStore = await cookies();
-
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-      },
-    }
-  );
-}
-```
-
-- `/src/lib/supabase/middleware.ts 파일 생성`
-
-```ts
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
-
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
-          );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
-
-  // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
-  // IMPORTANT: DO NOT REMOVE auth.getUser()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    return NextResponse.redirect(url);
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
   }
-
-  // IMPORTANT: You *must* return the supabaseResponse object as it is.
-  // If you're creating a new response object with NextResponse.next() make sure to:
-  // 1. Pass the request in it, like so:
-  //    const myNewResponse = NextResponse.next({ request })
-  // 2. Copy over the cookies, like so:
-  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-  // 3. Change the myNewResponse object to fit your needs, but avoid changing
-  //    the cookies!
-  // 4. Finally:
-  //    return myNewResponse
-  // If this is not done, you may be causing the browser and server to go out
-  // of sync and terminate the user's session prematurely!
-  console.log("supabaseResponse ========= ", supabaseResponse);
-  return supabaseResponse;
 }
 ```
 
-## 7. Next.js 에서 라우터 중간 처리 파일
+# tsconfig.json 설정
 
-- `/src/middleware.ts 생성` : Next에 역할이 정해진 파일명.
-- 임시로 `/src/_middleware.ts 로 파일명을 변경`
+```json
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+```
