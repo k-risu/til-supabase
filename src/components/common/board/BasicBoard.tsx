@@ -1,11 +1,12 @@
 import styles from "@/components/common/board/BasicBoard.module.scss";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
 import { ChevronUp } from "lucide-react";
+import LabelCalendar from "@/components/common/calendar/LabelCalendar";
 import MarkdownDialog from "../dialog/MarkdownDialog";
-import LabelCalendar from "../calendar/LabelCalendar";
+import { Input } from "@/components/ui/input";
 
+// contents 배열에 대한 타입 정의
 interface BoardContent {
   isCompleted: boolean;
   title: string;
@@ -40,22 +41,20 @@ function BasicBoard({ item, updateContent }: BasicBoardProps) {
         <div className={styles.container_body_calendarBox}>
           <LabelCalendar
             label="From"
-            required={false}
-            selectedDate={item.startDate}
-            onDateChange={() => {}}
+            required={true}
+            selectedDate={new Date(item.startDate)}
           />
           <LabelCalendar
             label="To"
             required={true}
-            selectedDate={item.endDate}
-            onDateChange={() => {}}
+            selectedDate={new Date(item.endDate)}
           />
           {/* <div className="flex items-center gap-3">
             <span className="text-[#6d6d6d]">From</span>
             <Input value={item.startDate.toString().split("T")[0]} disabled />
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-[#6d6d6d]">To</span>
+            <span className="text-[#6d6d6d]">From</span>
             <Input value={item.endDate.toString().split("T")[0]} disabled />
           </div> */}
         </div>
