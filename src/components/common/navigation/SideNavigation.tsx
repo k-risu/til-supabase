@@ -13,8 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Dot, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useAtom } from "jotai";
+import { sidebarStateAtom } from "@/app/store";
 
 function SideNavigation() {
+  // jotai 상태 사용하기
+  const [sidebarState, setSideState] = useAtom(sidebarStateAtom);
   // 라우터 이동
   const router = useRouter();
 
@@ -43,11 +47,16 @@ function SideNavigation() {
     console.log("등록된 id ", data.id);
     // 데이터 추가 성공시 할일 등록창으로 이동시킴
     // http://localhost:3000/create/ [data.id] 로 이동
+
     router.push(`/create/${data.id}`);
   };
   // read
   const fetchGetTodos = async () => {
+    console.log("fetchGetTodos 실행함 ");
     const { data, error, status } = await getTodos();
+    console.log("fetchGetTodos data ", data);
+    console.log("fetchGetTodos error ", error);
+    console.log("fetchGetTodos status ", status);
     // 에러 발생시
     if (error) {
       toast.error("데이터조회실패", {
@@ -62,12 +71,23 @@ function SideNavigation() {
       duration: 3000,
     });
 
+    console.log("너는 왜 안되니? data : ", data);
+
+    setSideState("default");
+
     setTodos(data);
   };
 
   useEffect(() => {
-    fetchGetTodos();
-  }, []);
+    if (sidebarState !== "default") {
+      fetchGetTodos();
+
+      if (sidebarState === "delete") {
+        router.push("/");
+      }
+    }
+  }, [sidebarState]);
+
   return (
     <div className={styles.container}>
       {/* 검색창 */}
