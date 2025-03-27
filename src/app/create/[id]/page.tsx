@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 import styles from "@/app/create/[id]/page.module.scss";
 // action
 import {
-  deleteTodoId,
+  deleteTodo,
   getTodoId,
   updateTodoId,
   updateTodoIdTitle,
@@ -40,11 +40,14 @@ function Page() {
   const [contents, setContents] = useState<BoardContent[]>([]);
   const [startDate, setStarDate] = useState<undefined | Date>(new Date());
   const [endDate, setEndDate] = useState<undefined | Date>(new Date());
+  // Progress Bar 처리
+  const [completeCount, setCompleteCount] = useState<number>(0);
+  const [totalCount, setTotalCount] = useState<number>(0);
 
   // Page 삭제 함수
   const handleDeleteBoard = async () => {
-    console.log("삭제할 페이지 id : ", id);
-    const { error, status } = await deleteTodoId(Number(id));
+    console.log(id, "제거하라");
+    const { error, status } = await deleteTodo(Number(id));
     if (!error) {
       router.push("/");
     }
@@ -52,21 +55,22 @@ function Page() {
 
   // 타이틀 저장 함수
   const handleSaveTitle = async () => {
-    console.log("title : ", title);
+    console.log(title);
     const { data, error, status } = await updateTodoIdTitle(Number(id), title);
-    console.log("data : ", data);
-    console.log("error : ", error);
-    console.log("status : ", status);
+    console.log(data);
+    console.log(error);
+    console.log(status);
   };
   // 컨텐츠 삭제 함수
   const deleteContent = async (deleteBoardId: string) => {
-    // console.log("deleteBoardId : ", deleteBoardId);
-    const tempContentArr = contents.filter(
+    // console.log("삭제할 컨텐츠 boardId ", deleteBoardId);
+    const tempConentArr = contents.filter(
       (item) => item.boardId !== deleteBoardId
     );
+    // 서버에 Row 를 업데이트 합니다.
     const { data, error, status } = await updateTodoId(
       Number(id),
-      JSON.stringify(tempContentArr)
+      JSON.stringify(tempConentArr)
     );
 
     fetchGetTodoId();
@@ -113,8 +117,16 @@ function Page() {
     setEndDate(data?.end_date ? new Date(data.end_date) : new Date());
     const temp = data?.contents ? JSON.parse(data.contents as string) : [];
     setContents(temp);
+    // 목록 갱신시 실행함.
+    calcCompletedCount(temp);
   };
-
+  // contents 의 isCompleted 가 true 인 갯수 파악하기
+  const calcCompletedCount = (gogo: BoardContent[]) => {
+    const arr = gogo.filter((item) => item.isCompleted === true);
+    // console.log("count : ", arr.length);
+    setCompleteCount(arr.length);
+    setTotalCount(arr.length / gogo.length);
+  };
   // 컨텐츠 추가하기
   const initData: BoardContent = {
     boardId: nanoid(),
@@ -189,10 +201,12 @@ function Page() {
           />
           {/* 진행율 */}
           <div className={styles.progressBar}>
-            <span className={styles.progressBar_status}>1/10 completed!</span>
+            <span className={styles.progressBar_status}>
+              {completeCount}/{contents.length} completed!
+            </span>
             {/* Progress 컴포넌트 배치 */}
             <Progress
-              value={33}
+              value={totalCount * 100}
               className="w-[30%] h-2"
               indicateColor="bg-orange-500"
             />
@@ -243,7 +257,7 @@ function Page() {
             </button>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-start w-full h-full gap-4">
+          <div className="flex flex-col items-center justify-start w-full h-full gap-4 overflow-y-scroll">
             {contents.map((item) => (
               <BasicBoard
                 key={item.boardId}

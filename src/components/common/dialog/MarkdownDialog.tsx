@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // SCSS
 import styles from "@/components/common/dialog/MarkdownDialog.module.scss";
 
@@ -55,7 +55,7 @@ function MarkdownDialog({ item, updateContent }: BasicBoardProps) {
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
 
-  const [isCompleted, setIsComplted] = useState<boolean>(
+  const [isCheckCompleted, setIsCheckCompleted] = useState<boolean>(
     item.isCompleted ? item.isCompleted : false
   );
 
@@ -77,7 +77,7 @@ function MarkdownDialog({ item, updateContent }: BasicBoardProps) {
       endDate: endDate,
       title: title,
       content: content,
-      isCompleted: isCompleted,
+      isCompleted: isCheckCompleted,
     };
     updateContent(tempContent);
 
@@ -86,6 +86,10 @@ function MarkdownDialog({ item, updateContent }: BasicBoardProps) {
     // setTitle("");
     // setContent("");
   };
+
+  useEffect(() => {
+    setIsCheckCompleted(item.isCompleted);
+  }, [item]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -99,7 +103,13 @@ function MarkdownDialog({ item, updateContent }: BasicBoardProps) {
         <DialogHeader>
           <DialogTitle>
             <div className={styles.dialog_titleBox}>
-              <Checkbox className="w-5 h-5" />
+              <Checkbox
+                className="w-5 h-5"
+                checked={isCheckCompleted}
+                onCheckedChange={() => {
+                  setIsCheckCompleted(!isCheckCompleted);
+                }}
+              />
               <input
                 type="text"
                 placeholder="Write a title for your board"

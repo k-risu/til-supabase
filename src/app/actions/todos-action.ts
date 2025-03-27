@@ -84,7 +84,7 @@ export async function updateTodoIdTitle(id: number, title: string) {
   };
 }
 
-export async function deleteTodoId(id: number) {
+export async function deleteTodo(id: number) {
   const supabase = await createServerSideClient();
 
   const { error, status } = await supabase.from("todos").delete().eq("id", id);
