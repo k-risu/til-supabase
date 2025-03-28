@@ -19,6 +19,7 @@
   justify-content: center;
   width: 100%;
   margin: 12px 0;
+  gap: 4px;
 }
 .container_todos {
   display: flex;
@@ -30,4 +31,9 @@
   font-size: 14px;
   font-weight: 500;
   color: #a6a6a6;
+}
+.container_todos_list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }/*# sourceMappingURL=SideNavigation.module.css.map */
