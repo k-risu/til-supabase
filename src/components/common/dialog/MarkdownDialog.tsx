@@ -41,6 +41,10 @@ interface BasicBoardProps {
 }
 
 function MarkdownDialog({ item, updateContent }: BasicBoardProps) {
+  const [isCheckComplted, setIsCheckCompleted] = useState<boolean>(
+    item.isCompleted
+  );
+
   // 다이얼로그 Props
   const [open, setOpen] = useState<boolean>(false);
 
@@ -55,7 +59,7 @@ function MarkdownDialog({ item, updateContent }: BasicBoardProps) {
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
 
-  const [isCheckCompleted, setIsCheckCompleted] = useState<boolean>(
+  const [isCompleted, setIsComplted] = useState<boolean>(
     item.isCompleted ? item.isCompleted : false
   );
 
@@ -77,10 +81,9 @@ function MarkdownDialog({ item, updateContent }: BasicBoardProps) {
       endDate: endDate,
       title: title,
       content: content,
-      isCompleted: isCheckCompleted,
+      isCompleted: isCheckComplted,
     };
     updateContent(tempContent);
-
     // 창닫기
     setOpen(false);
     // setTitle("");
@@ -105,9 +108,9 @@ function MarkdownDialog({ item, updateContent }: BasicBoardProps) {
             <div className={styles.dialog_titleBox}>
               <Checkbox
                 className="w-5 h-5"
-                checked={isCheckCompleted}
+                checked={isCheckComplted}
                 onCheckedChange={() => {
-                  setIsCheckCompleted(!isCheckCompleted);
+                  setIsCheckCompleted(!isCheckComplted);
                 }}
               />
               <input

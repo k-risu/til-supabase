@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useAtom } from "jotai";
 import { sidebarStateAtom } from "@/app/store";
+import { signOut } from "@/lib/supabase/actions";
 
 function SideNavigation() {
   // jotai 상태 사용하기
@@ -52,11 +53,7 @@ function SideNavigation() {
   };
   // read
   const fetchGetTodos = async () => {
-    console.log("fetchGetTodos 실행함 ");
     const { data, error, status } = await getTodos();
-    console.log("fetchGetTodos data ", data);
-    console.log("fetchGetTodos error ", error);
-    console.log("fetchGetTodos status ", status);
     // 에러 발생시
     if (error) {
       toast.error("데이터조회실패", {
@@ -70,11 +67,7 @@ function SideNavigation() {
       description: "데이터조회에 성공하였습니다",
       duration: 3000,
     });
-
-    console.log("너는 왜 안되니? data : ", data);
-
     setSideState("default");
-
     setTodos(data);
   };
 
@@ -87,6 +80,11 @@ function SideNavigation() {
       }
     }
   }, [sidebarState]);
+
+  const fetchSignOut = async () => {
+    await signOut();
+    router.push("/");
+  };
 
   return (
     <div className={styles.container}>
@@ -124,6 +122,17 @@ function SideNavigation() {
           {/* 로그아웃 버튼 배치 */}
           {"홍길동"}님 Your Todo
         </div>
+
+        <div>
+          <button
+            className="border rounded px-2.5 py-2"
+            type="submit"
+            onClick={fetchSignOut}
+          >
+            Sign Out
+          </button>
+        </div>
+
         <div className={styles.container_todos_list}>
           {todos!.map((item) => (
             <div

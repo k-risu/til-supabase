@@ -132,6 +132,7 @@
     height: 100%;
   }
 }
+
 .ProseMirror {
   /* 기본 스타일 */
   > * + * {
@@ -156,13 +157,14 @@
     font-weight: bold;
   }
   h5 {
-    font-size: 0.83em;
+    font-size: 0.9em;
     font-weight: bold;
   }
   h6 {
-    font-size: 0.67em;
+    font-size: 0.75em;
     font-weight: bold;
   }
+
   /* 리스트 스타일 */
   ul,
   ol {

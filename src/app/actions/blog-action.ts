@@ -51,16 +51,12 @@ export async function getBlogId(id: number) {
 }
 
 // Update 기능 id 한개
-export async function updateBlogId(
-  id: number,
-  title: string,
-  contents: string
-) {
+export async function updateBlogId(id: number, title: string, content: string) {
   const supabase = await createServerSideClient();
 
   const { data, error, status } = await supabase
     .from("blog")
-    .update({ contents: contents, title: title })
+    .update({ content: content, title: title })
     .eq("id", id)
     .select()
     .single();

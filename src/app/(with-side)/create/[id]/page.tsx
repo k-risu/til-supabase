@@ -3,7 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 // nanoid
 import { nanoid } from "nanoid";
 // scss
-import styles from "@/app/create/[id]/page.module.scss";
+import styles from "@/app/(with-side)/create/[id]/page.module.scss";
 // action
 import {
   deleteTodo,
@@ -36,7 +36,7 @@ interface BoardContent {
 
 function Page() {
   // jotai 상태 사용하기
-  const [sideState, setSideState] = useAtom(sidebarStateAtom);
+  const [sidebarState, setSideState] = useAtom(sidebarStateAtom);
 
   const router = useRouter();
   const { id } = useParams();
@@ -66,7 +66,8 @@ function Page() {
       startDate,
       endDate
     );
-    //jotai 의 State 갱신
+
+    // jotai의 State 갱신
     setSideState("titleChange");
   };
   // 컨텐츠 삭제 함수
@@ -86,7 +87,7 @@ function Page() {
 
   // 컨텐츠 데이터 업데이트 함수
   const updateContent = async (newData: BoardContent) => {
-    console.log("최종전달 ", newData);
+    // console.log("최종전달 ", newData);
 
     const newContentArr = contents.map((item) => {
       if (item.boardId === newData.boardId) {
@@ -125,7 +126,7 @@ function Page() {
     setEndDate(data?.end_date ? new Date(data.end_date) : new Date());
     const temp = data?.contents ? JSON.parse(data.contents as string) : [];
     setContents(temp);
-    // 목록 갱신시 실행함.
+    // 목록 갱신시
     calcCompletedCount(temp);
   };
   // contents 의 isCompleted 가 true 인 갯수 파악하기
@@ -133,8 +134,9 @@ function Page() {
     const arr = gogo.filter((item) => item.isCompleted === true);
     // console.log("count : ", arr.length);
     setCompleteCount(arr.length);
-    setTotalCount(arr.length / gogo.length);
+    setTotalCount((arr.length / gogo.length) * 100);
   };
+
   // 컨텐츠 추가하기
   const initData: BoardContent = {
     boardId: nanoid(),
@@ -150,7 +152,7 @@ function Page() {
     // 기본으로 추가될 내용
 
     const updateContent = [...contents, addContent];
-    console.log("updateContent : ", updateContent);
+    // console.log("updateContent : ", updateContent);
     // 서버에 Row 를 업데이트 합니다.
     const { data, error, status } = await updateTodoId(
       Number(id),
@@ -176,7 +178,8 @@ function Page() {
   };
 
   useEffect(() => {
-    setSideState("add");
+    // jotai의 State 갱신
+    setSideState("add Page");
     fetchGetTodoId();
   }, []);
 
@@ -215,7 +218,7 @@ function Page() {
             </span>
             {/* Progress 컴포넌트 배치 */}
             <Progress
-              value={totalCount * 100}
+              value={totalCount}
               className="w-[30%] h-2"
               indicateColor="bg-orange-500"
             />

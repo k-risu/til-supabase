@@ -321,7 +321,6 @@ function BackgroundColor({ editor }: { editor: Editor }) {
     </div>
   );
 }
-
 /** Quote 아이콘 */
 function Quote({ editor }: { editor: Editor }) {
   if (!editor) return null;
@@ -440,5 +439,5 @@ export const Icon = {
   Quote,
   Code,
   Link,
-  //   AddPhoto,
+  // AddPhoto,
 };
