@@ -24,6 +24,7 @@ import Toolbar from "./toolbar";
 import { Button } from "@/components/ui/button";
 import { createBlog } from "@/app/actions/blog-action";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export const CreateEditor = () => {
   // 내용
@@ -66,18 +67,18 @@ export const CreateEditor = () => {
 
   const onSubmit = async () => {
     const { data, error, status } = await createBlog({
-      content: content,
-      title: title,
+      title,
+      content,
     });
-    if (error) {
-      console.log(error);
+    if (!title || !content) {
+      toast.error("내용과 제목을 입력해주세요.");
+      return;
     }
-    if (status === 201) {
-      console.log("블로그 생성 성공");
-      console.log(data);
-    }
-    console.log(error);
-    console.log(status);
+
+    toast.success("글이 성공적으로 등록되었습니다.");
+    // 내용 초기화
+    setTitle("");
+    setContent("");
   };
 
   return (
