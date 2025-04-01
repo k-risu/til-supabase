@@ -1,6 +1,6 @@
 "use client";
 
-import { signInWithGoogle } from "@/lib/supabase/actions";
+import { signInWithGoogle, signInWithKakao } from "@/lib/supabase/actions";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +26,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { signInWithKakao } from "@/lib/supabase/action";
 
 const formSchema = z.object({
   email: z.string().email({
