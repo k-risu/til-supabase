@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://til-supabase-fawn.vercel.app
+
+# Sitemaps
+Sitemap: https://til-supabase-fawn.vercel.app/sitemap.xml

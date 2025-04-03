@@ -128,3 +128,40 @@ export const metadata: Metadata = {
   },
 };
 ```
+
+- `소유권 확인` 성공시 다음 실행
+- `웹마스터도구 > 요약 > 검증 > robots.txt` (https://searchadvisor.naver.com/console/summary)
+
+## public/robots.txt 파일 생성
+
+```txt
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://til-supabase-fawn.vercel.app
+
+# Sitemaps
+Sitemap: https://til-supabase-fawn.vercel.app/sitemap.xml
+```
+
+## /public/sitemap.xml 파일 생성
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemap><loc>https://til-supabase-fawn.vercel.app/sitemap-0.xml</loc></sitemap>
+</sitemapindex>
+```
+
+## /public/sitemap-0.xml 파일 생성
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url><loc>https://til-supabase-fawn.vercel.app</loc><lastmod>2023-09-11T23:52:17.732Z</lastmod><changefreq>todos</changefreq><priority>0.7</priority></url>
+<url><loc>https://til-supabase-fawn.vercel.app/blog</loc><lastmod>2023-09-11T23:52:17.732Z</lastmod><changefreq>blog</changefreq><priority>0.7</priority></url>
+<url><loc>https://til-supabase-fawn.vercel.app/todos</loc><lastmod>2023-09-11T23:52:17.732Z</lastmod><changefreq>todos</changefreq><priority>0.7</priority></url>
+</urlset>
+```
