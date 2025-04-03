@@ -171,3 +171,21 @@ Sitemap: https://til-supabase-fawn.vercel.app/sitemap.xml
 ## 웹마스터 도구 > 간단 체크 >
 
 # 구글 서치 엔진 등록하기
+
+https://search.google.com/search-console/about
+
+```tsx
+export const metadata: Metadata = {
+  title: "Todo",
+  description: "Todo Supabase",
+  openGraph: {
+    title: "Todo",
+    description: "Todo Supabase",
+    images: [{ url: "/thumbnail.png" }],
+  },
+  other: {
+    "naver-site-verification": "208df0f5372346689bf8272c2e8b5ebec7c42cee",
+    "google-site-verification": "BwNhvUKZEh4GoOP4E3EimihGIn04AZ_aXYxDpi85Y1I",
+  },
+};
+```
