@@ -97,3 +97,34 @@ export default eslintConfig;
 - `콘솔`로 이동
 - `프로젝트` 선택
 - `API 및 서비스` > `OAuth 동의` 화면 > `클라이언트` > `목록 중 해당 프로젝트` 선택
+- 승인된 리디렉션 URL 항목에 추가 (`https://til-supabase-fawn.vercel.app`)
+
+# 네이버 서치 어드바이저 등록하기
+
+- https://searchadvisor.naver.com/
+- 웹마스터 도구 (https://searchadvisor.naver.com/console/board)
+- `사이트 소유확인 > HTML 태그 복사` 으로 이동
+
+```html
+<meta
+  name="naver-site-verification"
+  content="208df0f5372346689bf8272c2e8b5ebec7c42cee"
+/>
+```
+
+- /src/app/layout.tsx
+
+```tsx
+export const metadata: Metadata = {
+  title: "Todo",
+  description: "Todo Supabase",
+  openGraph: {
+    title: "Todo",
+    description: "Todo Supabase",
+    images: [{ url: "/thumbnail.png" }],
+  },
+  other: {
+    "naver-site-verification": "208df0f5372346689bf8272c2e8b5ebec7c42cee",
+  },
+};
+```
