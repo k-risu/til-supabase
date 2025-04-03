@@ -165,3 +165,9 @@ Sitemap: https://til-supabase-fawn.vercel.app/sitemap.xml
 <url><loc>https://til-supabase-fawn.vercel.app/todos</loc><lastmod>2023-09-11T23:52:17.732Z</lastmod><changefreq>todos</changefreq><priority>0.7</priority></url>
 </urlset>
 ```
+
+## git push 이후 robots.txt 수집 요청 실행
+
+## 웹마스터 도구 > 간단 체크 >
+
+# 구글 서치 엔진 등록하기
