@@ -90,3 +90,10 @@ const eslintConfig = [
 
 export default eslintConfig;
 ```
+
+# 구글 로그인 후 Redirec 처리
+
+- https://cloud.google.com/developers?hl=ko
+- `콘솔`로 이동
+- `프로젝트` 선택
+- `API 및 서비스` > `OAuth 동의` 화면 > `클라이언트` > `목록 중 해당 프로젝트` 선택
