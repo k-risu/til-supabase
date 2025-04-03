@@ -48,3 +48,7 @@ export const metadata: Metadata = {
 - next-15 깃허브 (deploy) 부분 참조
 
 # Vercel Deoploy
+
+- 환경변수 등록 주의
+  - `SITE_URL 은 로그인 이후 이동할 주소 이므로 주의하기`
+  - `https://til-supabase-fawn.vercel.app`
