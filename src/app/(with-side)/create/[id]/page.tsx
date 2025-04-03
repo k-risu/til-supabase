@@ -23,6 +23,8 @@ import Image from "next/image";
 import { ChevronLeftIcon } from "lucide-react";
 import { useAtom } from "jotai";
 import { sidebarStateAtom } from "@/app/store";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/providers/ReactQueryProvider";
 
 // contents 배열에 대한 타입 정의
 interface BoardContent {
@@ -49,86 +51,105 @@ function Page() {
   const [completeCount, setCompleteCount] = useState<number>(0);
   const [totalCount, setTotalCount] = useState<number>(0);
 
+  // id 에 해당하는 Row 데이터를 읽어오기
+  const {
+    error,
+    data: queryData,
+    isSuccess,
+  } = useQuery({
+    queryKey: ["todos"],
+    queryFn: () => getTodoId(Number(id)),
+  });
+
   // Page 삭제 함수
-  const handleDeleteBoard = async () => {
-    // console.log(id, "제거하라");
-    const { error, status } = await deleteTodo(Number(id));
-    if (!error) {
+  const deleteBoardMutaion = useMutation({
+    mutationFn: () => {
+      return deleteTodo(Number(id));
+    },
+    onSuccess: () => {
       setSideState("delete");
-    }
-  };
+    },
+    onError: (error) => {
+      console.log(error.message);
+    },
+  });
 
   // 타이틀 저장 함수
-  const handleSaveTitle = async () => {
-    const { data, error, status } = await updateTodoIdTitle(
-      Number(id),
-      title,
-      startDate,
-      endDate
-    );
+  const saveTitleMuation = useMutation({
+    mutationFn: () => {
+      return updateTodoIdTitle(Number(id), title, startDate, endDate);
+    },
+    onSuccess: () => {
+      // jotai의 State 갱신
+      setSideState("titleChange");
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
 
-    // jotai의 State 갱신
-    setSideState("titleChange");
-  };
   // 컨텐츠 삭제 함수
-  const deleteContent = async (deleteBoardId: string) => {
-    // console.log("삭제할 컨텐츠 boardId ", deleteBoardId);
-    const tempConentArr = contents.filter(
-      (item) => item.boardId !== deleteBoardId
-    );
-    // 서버에 Row 를 업데이트 합니다.
-    const { data, error, status } = await updateTodoId(
-      Number(id),
-      JSON.stringify(tempConentArr)
-    );
-
-    fetchGetTodoId();
-  };
-
-  // 컨텐츠 데이터 업데이트 함수
-  const updateContent = async (newData: BoardContent) => {
-    // console.log("최종전달 ", newData);
-
-    const newContentArr = contents.map((item) => {
-      if (item.boardId === newData.boardId) {
-        return newData;
-      }
-      return item;
-    });
-    // 서버에 Row 를 업데이트 합니다.
-    const { data, error, status } = await updateTodoId(
-      Number(id),
-      JSON.stringify(newContentArr)
-    );
-
-    fetchGetTodoId();
-  };
-
-  // id 에 해당하는 Row 데이터를 읽어오기
-  const fetchGetTodoId = async () => {
-    const { data, error, status } = await getTodoId(Number(id));
-    // 에러 발생시
-    if (error) {
-      toast.error("데이터 호출 실패", {
-        description: `데이터 호출에 실패하였습니다. ${error.message}`,
+  const deleteContentMutation = useMutation({
+    mutationFn: (deleteBoardId: string) => {
+      const tempContentArr = contents.filter(
+        (item) => item.boardId !== deleteBoardId
+      );
+      return updateTodoId(Number(id), JSON.stringify(tempContentArr));
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["todos"] });
+    },
+    onError: (error) => {
+      toast.error("컨텐츠 삭제 실패", {
+        description: `컨텐츠 삭제에 실패했습니다. ${error}`,
         duration: 3000,
       });
-      return;
-    }
-    // 최종 데이터
-    toast.success("데이터 호출 성공", {
-      description: "데이터 호출에 성공하였습니다",
-      duration: 3000,
-    });
+    },
+  });
 
-    setTitle(data?.title ? data.title : "");
-    setStarDate(data?.start_date ? new Date(data.start_date) : new Date());
-    setEndDate(data?.end_date ? new Date(data.end_date) : new Date());
-    const temp = data?.contents ? JSON.parse(data.contents as string) : [];
-    setContents(temp);
-    // 목록 갱신시
-    calcCompletedCount(temp);
-  };
+  // 컨텐츠 데이터 업데이트 함수
+  const updateContentMutation = useMutation({
+    mutationFn: (newData: BoardContent) => {
+      const newContentArr = contents.map((item) => {
+        if (item.boardId === newData.boardId) {
+          return newData;
+        }
+        return item;
+      });
+      return updateTodoId(Number(id), JSON.stringify(newContentArr));
+    },
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["todos"] });
+    },
+    onError: (error) => {
+      toast.error("컨텐츠 업데이트 실패", {
+        description: `컨텐츠 업데이트에 실패했습니다. ${error}`,
+        duration: 3000,
+      });
+    },
+  });
+
+  // 컨텐츠 생성 함수
+  const onCreateContentMutation = useMutation({
+    mutationFn: (newData: BoardContent) => {
+      const updateContent = [...contents, newData];
+      return updateTodoId(Number(id), JSON.stringify(updateContent));
+    },
+    onSuccess: () => {
+      toast.success("데이터 컨텐츠 업데이트 성공", {
+        description: "데이터 컨텐츠 업데이트에 성공하였습니다",
+        duration: 3000,
+      });
+      queryClient.refetchQueries({ queryKey: ["todos"] });
+    },
+    onError: (error) => {
+      toast.error("데이터 컨텐츠 업데이트 실패", {
+        description: `데이터 컨텐츠 업데이트에 실패하였습니다. ${error}`,
+        duration: 3000,
+      });
+    },
+  });
+
   // contents 의 isCompleted 가 true 인 갯수 파악하기
   const calcCompletedCount = (gogo: BoardContent[]) => {
     const arr = gogo.filter((item) => item.isCompleted === true);
@@ -147,41 +168,57 @@ function Page() {
     isCompleted: false,
   };
 
-  const onCreateContent = async (newData: BoardContent) => {
-    const addContent = newData;
-    // 기본으로 추가될 내용
+  useEffect(() => {
+    setSideState("add Page");
 
-    const updateContent = [...contents, addContent];
-    // console.log("updateContent : ", updateContent);
-    // 서버에 Row 를 업데이트 합니다.
-    const { data, error, status } = await updateTodoId(
-      Number(id),
-      JSON.stringify(updateContent)
-    );
+    if (queryData) {
+      setTitle((prev) =>
+        queryData.data?.title && prev !== queryData.data.title
+          ? queryData.data.title
+          : prev
+      );
 
-    // 에러 발생시
-    if (error) {
-      toast.error("데이터 컨텐츠 업데이트 실패", {
-        description: `데이터 컨텐츠 업데이트에 실패하였습니다. ${error.message}`,
-        duration: 3000,
-      });
-      return;
+      setStarDate((prev) =>
+        queryData.data?.start_date &&
+        new Date(queryData.data.start_date).getTime() !== prev?.getTime()
+          ? new Date(queryData.data.start_date)
+          : prev
+      );
+
+      setEndDate((prev) =>
+        queryData.data?.end_date &&
+        new Date(queryData.data.end_date).getTime() !== prev?.getTime()
+          ? new Date(queryData.data.end_date)
+          : prev
+      );
+
+      const temp = queryData.data?.contents
+        ? JSON.parse(queryData.data.contents as string)
+        : [];
+
+      // 기존 상태와 비교 후 변경된 경우만 업데이트
+      if (JSON.stringify(temp) !== JSON.stringify(contents)) {
+        setContents(temp);
+        calcCompletedCount(temp);
+      }
     }
-    // 최종 데이터
-    toast.success("데이터 컨텐츠 업데이트 성공", {
-      description: "데이터 컨텐츠 업데이트에 성공하였습니다",
+  }, [queryData]);
+
+  if (error) {
+    toast.error("데이터 호출 실패", {
+      description: `데이터 호출에 실패하였습니다. ${error.message}`,
       duration: 3000,
     });
+    return <div>데이터 호출에 실패하였습니다.</div>;
+  }
 
-    // 자료 새로 후출
-    fetchGetTodoId();
-  };
-
-  useEffect(() => {
-    // jotai의 State 갱신
-    setSideState("add Page");
-    fetchGetTodoId();
-  }, []);
+  if (queryData) {
+    // 최종 데이터
+    // toast.success("데이터 호출 성공", {
+    //   description: "데이터 호출에 성공하였습니다",
+    //   duration: 3000,
+    // });
+  }
 
   return (
     <div className={styles.container}>
@@ -193,11 +230,19 @@ function Page() {
           </Button>
         </div>
         <div className="flex gap-2">
-          <Button variant={"outline"} onClick={handleSaveTitle}>
-            저장
+          <Button
+            variant={"outline"}
+            disabled={saveTitleMuation.isPending}
+            onClick={() => saveTitleMuation.mutate()}
+          >
+            {saveTitleMuation.isPending ? "저장중 ..." : "저장"}
           </Button>
-          <Button variant={"outline"} onClick={handleDeleteBoard}>
-            삭제
+          <Button
+            variant={"outline"}
+            disabled={deleteBoardMutaion.isPending}
+            onClick={() => deleteBoardMutaion.mutate()}
+          >
+            {deleteBoardMutaion.isPending ? "삭제중..." : "삭제"}
           </Button>
         </div>
       </div>
@@ -242,7 +287,7 @@ function Page() {
             <Button
               variant={"outline"}
               className="w-[15%] text-white bg-orange-400 border-orange-500 hover:bg-orange-400 hover:text-white cursor-pointer"
-              onClick={() => onCreateContent(initData)}
+              onClick={() => onCreateContentMutation.mutate(initData)}
             >
               Add New Board
             </Button>
@@ -260,7 +305,7 @@ function Page() {
             </span>
             <button
               className={styles.button}
-              onClick={() => onCreateContent(initData)}
+              onClick={() => onCreateContentMutation.mutate(initData)}
             >
               <Image
                 src="/assets/images/round-button.svg"
@@ -276,8 +321,8 @@ function Page() {
               <BasicBoard
                 key={item.boardId}
                 item={item}
-                updateContent={updateContent}
-                deleteContent={deleteContent}
+                updateContent={(data) => updateContentMutation.mutate(data)}
+                deleteContent={(id) => deleteContentMutation.mutate(id)}
               />
             ))}
           </div>
